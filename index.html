@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Project UAS</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
+
+    <!-- Plugin CSS -->
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="lib/simple-line-icons/css/simple-line-icons.css">
+    <link rel="stylesheet" href="lib/device-mockups/device-mockups.min.css">
+
+    <!-- Theme CSS -->
+    <link href="css/new-age.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <script>
+    //variable global
+    var dataGeo, daerahFull, latitude, longitude, now, startOfDay, timestampoftheday, dataSholat;
+    var tanggal, imsak, shubuh, terbit, dzuhur, ashr, maghrib, isya;
+    var urlGoogle = "http://maps.googleapis.com/maps/api/geocode/json";
+    var urlAladhan = "http://api.aladhan.com/timings/";
+
+  	function ayoSholat(){
+      //ambil data dari input daerah
+  		var daerah = $('#daerah').val();
+      //ajax ke Googlemaps API
+      $.ajax({
+    		url : urlGoogle+"?address="+daerah,
+    		type : "GET",
+    		success : function(data){
+          dataGeo = data;
+          daerahFull = dataGeo.results[0].formatted_address;
+          latitude = dataGeo.results[0].geometry.location.lat;
+          longitude = dataGeo.results[0].geometry.location.lng;
+
+          //ambil Timestamp
+          now = new Date();
+          startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          timestampoftheday = startOfDay / 1000;
+
+          console.log(timestampoftheday);
+          //ajax ke aladhan.com API
+          $.ajax({
+            url : urlAladhan+timestampoftheday+'?latitude='+latitude+'&longitude='+longitude+'&timezonestring=Asia/Jakarta',
+            type : "GET",
+          	success : function(data){
+              dataSholat = data;
+              tanggal = dataSholat.data.date.readable;
+              imsak = dataSholat.data.timings.Imsak;
+              shubuh = dataSholat.data.timings.Fajr;
+              terbit = dataSholat.data.timings.Sunrise;
+              dzuhur = dataSholat.data.timings.Dhuhr;
+              ashr = dataSholat.data.timings.Asr;
+              maghrib = dataSholat.data.timings.Maghrib;
+              isya = dataSholat.data.timings.Isha;
+
+              html = '\
+			  <div class="row">\
+                <div class="col-lg-12 text-center">\
+                    <div class="section-heading">\
+                        <h2 class="text-muted">Selamat Menunaikan Ibadah Sholat Fardhu!</h2>\
+						<p>Jadwal Adzan</b><br/><br/>\
+						 <div class="col-md-6">\
+                                <div class="feature-item">\
+									<p for="namadaerah">\
+									<h4>Daerah</h4>\
+                                    <h4 class="text-muted">'+daerahFull+'</h4><br/></p>\
+									<p for="tanggal">\
+									<h4>Tanggal</h4>\
+                                    <h4 class="text-muted">'+tanggal+'</h4><br/></p>\
+									</div>\
+							</div>\
+							<div class="col-md-6">\
+								<div class="feature-item">\
+									<p for="latitude">\
+									<h4>Latitude</h4>\
+                                    <h4 class="text-muted">'+latitude+'</h4><br/></p>\
+									<p for="longitude">\
+									<h4>Longitude</h4>\
+                                    <h4 class="text-muted">'+longitude+'</h4><br/></p>\
+								</div>\
+							</div>\
+                    </div>\
+                </div>\
+            </div>\
+            <div class="row">\
+                <div class="col-md-12">\
+                    <div class="container-fluid">\
+                        <div class="row">\
+                            <div class="col-md-4">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Imsak</h3>\
+                                    <h3 class="text-muted"> '+imsak+' WIB</h3>\
+                                </div>\
+                            </div>\
+                            <div class="col-md-4">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Subuh</h3>\
+                                    <h3 class="text-muted">'+shubuh+' WIB</h3>\
+									</div>\
+                            </div>\
+							<div class="col-md-4">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Terbit</h3>\
+                                    <h3 class="text-muted">'+terbit+' WIB</h3>\
+									</div>\
+                            </div>\
+                        </div>\
+                        <div class="row">\
+                            <div class="col-md-6">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Dzuhur</h3>\
+                                    <h3 class="text-muted">'+dzuhur+' WIB</h3>\
+									</div>\
+                            </div>\
+                            <div class="col-md-6">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Ashar</h3>\
+                                    <h3 class="text-muted">'+ashr+' WIB</h3>\
+									</div>\
+                            </div>\
+                        </div>\
+						<div class="row">\
+                            <div class="col-md-6">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Maghrib</h3>\
+                                    <h3 class="text-muted">'+maghrib+' WIB</h3>\
+									</div>\
+                            </div>\
+                            <div class="col-md-6">\
+                                <div class="feature-item">\
+                                    <i class="icon-clock"></i>\
+                                    <h3>Isya</h3>\
+                                    <h3 class="text-muted">'+isya+' WIB</h3>\
+									</div>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+             \
+              ';
+              $('#output').html(html);
+            },
+            error : function(data) {
+              alert('Ada kesalahan sistem, silahkan dicoba kembali...');
+            }
+          });
+    		},
+    		error : function(data) {
+          alert('Ada kesalahan sistem, silahkan dicoba kembali...');
+    		}
+    	});
+  	}
+  </script>
+</head>
+
+<body id="page-top">
+
+    <nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand page-scroll" href="#page-top"><i class="icon-arrow-up"> </i>Kembali Atas</a>
+            </div>
+        </div>
+    </nav>
+
+	<header>
+        <div class="container" style="position:center">
+			<div class="row">
+                <div class="col-md-12">
+                    <div class="header-content" style="text-align:center">
+                        <div class="header-content-inner" >
+								<h1>Jadwal Adzan Masjid Agung</h1>
+								<div class="input-group btn-xl page-scroll">
+								  <span class="input-group-addon" id="basic-addon3"><i class="icon-bulb"></i> Kota/Kabupaten</span>
+								  <input type="lokasi" class="form-control" id="daerah">
+								</div>
+								<br/><a href="#jadwal" class="btn btn-outline btn-xl page-scroll" onclick="ayoSholat()"> <i class="icon-magnifier"> </i> Lihat</a>
+						</div>
+                    </div>
+				</div>
+			</div>
+        </div>
+    </header>
+	
+    <section id="jadwal" class="features">
+        <div class="container" id="output">
+            
+        </div>
+    </section>
+
+    
+
+    <footer>
+        <div class="container">
+            <p></p>
+            <p>&copy; 2017 | Custom by : Aprilia , Fiko , Taufik</p>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="lib/jquery/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+    <!-- Theme JavaScript -->
+    <script src="js/new-age.min.js"></script>
+	
+</body>
+	<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+</html>
